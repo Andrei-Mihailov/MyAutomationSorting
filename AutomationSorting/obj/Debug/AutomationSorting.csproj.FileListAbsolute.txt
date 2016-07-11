@@ -12,3 +12,4 @@ C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\EntityF
 C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\System.Data.SQLite.xml
 C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\obj\Debug\AutomationSorting.exe
 C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\obj\Debug\AutomationSorting.pdb
+C:\AMihajlov\Конвеер\MyAutomationSorting\AutomationSorting\bin\Debug\AutomationSorting.exe.config
