@@ -1,0 +1,14 @@
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\AutomationSorting.exe.config
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\obj\Debug\AutomationSorting.csprojResolveAssemblyReference.cache
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\x86\sqlite3.dll
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\x64\sqlite3.dll
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\AutomationSorting.exe
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\AutomationSorting.pdb
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\EntityFramework.dll
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\EntityFramework.SqlServer.dll
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\System.Data.SQLite.dll
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\EntityFramework.xml
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\EntityFramework.SqlServer.xml
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\bin\Debug\System.Data.SQLite.xml
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\obj\Debug\AutomationSorting.exe
+C:\work\myrecon\Automation\AutomationSorting\AutomationSorting\obj\Debug\AutomationSorting.pdb
