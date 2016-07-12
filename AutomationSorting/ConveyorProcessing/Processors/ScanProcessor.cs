@@ -5,8 +5,6 @@ using AutomationSorting.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutomationSorting.ConveyorProcessing
 {
@@ -29,11 +27,17 @@ namespace AutomationSorting.ConveyorProcessing
 
             _hardwareController = HardwareController.GetInstance();
             _hardwareController.NewBarcodeEvent += NewBarcodeEventHandler;
+            _hardwareController.SortingCompletedEvent += SortingCompletedEventHandler;
         }
 
         private void NewBarcodeEventHandler(object sender, NewBarcodeEventArgs e)
         {
             AddBarcode(e.Barcode);
+        }
+
+        private void SortingCompletedEventHandler(object sender, SortingCompletedEventArgs e)
+        {
+          //обработка прерывания при получении отклика об окончании обработки товара
         }
 
         public void Start(ProcessingUnit unit)

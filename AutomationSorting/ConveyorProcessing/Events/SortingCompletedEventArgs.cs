@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutomationSorting.ConveyorProcessing.Events
 {
-    public class SortingCompletedEventArgs
+    public class SortingCompletedEventArgs : EventArgs
     {
         public int Index { get; set; }
     }

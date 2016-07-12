@@ -1,11 +1,7 @@
 ﻿using AutomationSorting.ConveyorProcessing.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO.Ports;
-using System.IO;
 
 namespace AutomationSorting.ConveyorProcessing
 {
@@ -39,6 +35,14 @@ namespace AutomationSorting.ConveyorProcessing
             return sb.ToString().ToUpper();
         }
         string tmp_str = "";
+        private string  Str_PrintingTask = "" , 
+                        Str_SortingError = "",
+                        Str_SortingIndex = "",
+                        Str_ScheduleSorting = "",
+                        Str_ScheduleUnsorted = "";
+        private int err;
+        private int index = 0, point = 0;
+        private long Time = 0;
         public void serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
@@ -46,7 +50,7 @@ namespace AutomationSorting.ConveyorProcessing
                 int bytes = serialPort.BytesToRead + 0;
                 byte[] comBuffer = new byte[bytes];
                 serialPort.Read(comBuffer, 0, bytes);
-                
+
                 for (int i_tmp = 0; i_tmp < bytes; i_tmp++)
                 {
                     string a = ByteArrayToHexString(comBuffer[i_tmp]);
@@ -239,13 +243,88 @@ namespace AutomationSorting.ConveyorProcessing
                         a_to_tmp_str = "~";
                     tmp_str += a_to_tmp_str;
                 }
+                ChoiseMethodSorting(tmp_str);
             }
-            catch (Exception e3)
+            catch (Exception e1)
             {
-                ErrorInf.Add("Ошибка при приеме информации по COM-порту! " + e3.Message);
-               // Show(e3.Message);
+                ErrorInf.Add("Ошибка при приеме информации по COM-порту! " + e1.Message.ToString());
             }
         }
+
+        public void ChoiseMethodSorting (string str)
+        {
+            if (str == " ")
+                OnNewBarcodeEvent(str);
+            if (str == " ")
+                OnSortingCompletedEvent(Convert.ToInt16(str));
+            if (str.StartsWith(Str_PrintingTask) == true)//строка начинается с команды на печать 
+            {
+                if (str.IndexOf(",", Str_PrintingTask.Length) != -1)//первая запятая после команды на печать
+                {
+                    point = str.IndexOf(",", Str_PrintingTask.Length);
+                    if (str.IndexOf(",", Str_PrintingTask.Length + 2) != -1)//вторая запятая
+                    {
+                        index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", Str_PrintingTask.Length + 2) - point));//копируем подстроку длиной length
+                        point = str.IndexOf(",", Str_PrintingTask.Length + 2);//указатель на вторую запятую
+                        Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                        SchedulePrintingTask(index, Time);//вызываем метод печати
+                    }
+                }
+            }
+            if (str.StartsWith(Str_SortingError) == true)//строка начинается с команды на ручную обработку 
+            {
+                if (str.IndexOf(",", Str_SortingError.Length) != -1)//первая запятая после команды на ручную обработку 
+                {
+                    point = str.IndexOf(",", Str_SortingError.Length);
+                    if (str.IndexOf(",", Str_SortingError.Length + 2) != -1)//вторая запятая
+                    {
+                        err = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", Str_SortingError.Length + 2) - point));//копируем подстроку длиной length
+                        point = str.IndexOf(",", Str_SortingError.Length + 2);//указатель на вторую запятую
+                        if (str.IndexOf(",", point + 2) != -1)//третья запятая
+                        {
+                            index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", point + 2) - point));//копируем подстроку длиной length
+                            point = str.IndexOf(",", point + 2);//указатель на третью запятую
+                            Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                            ScheduleSortingErrorProcessing((ProcessingErrorCodeEnum)err, index, Time);//вызываем метод ручной обработки
+                        }
+                    }
+                }
+            }
+            if (str.StartsWith(Str_ScheduleSorting) == true)//строка начинается с команды на скидывание
+            {
+                if (str.IndexOf(",", Str_ScheduleSorting.Length) != -1)//первая запятая после команды на скидывание
+                {
+                    point = str.IndexOf(",", Str_ScheduleSorting.Length);
+                    if (str.IndexOf(",", Str_ScheduleSorting.Length + 2) != -1)//вторая запятая
+                    {
+                        Str_SortingIndex = str.Substring(point++, str.IndexOf(",", Str_ScheduleSorting.Length + 2) - point);//копируем подстроку длиной length
+                        point = str.IndexOf(",", Str_ScheduleSorting.Length + 2);//указатель на вторую запятую
+                        if (str.IndexOf(",", point + 2) != -1)//третья запятая
+                        {
+                            index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", point + 2) - point));//копируем подстроку длиной length
+                            point = str.IndexOf(",", point + 2);//указатель на третью запятую
+                            Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                            ScheduleSorting(Str_SortingIndex, index, Time);//вызываем метод скидывания
+                        }
+                    }
+                }
+            }
+            if (str.StartsWith(Str_ScheduleUnsorted) == true)//строка начинается с команды на несортированный товар 
+            {
+                if (str.IndexOf(",", Str_ScheduleUnsorted.Length) != -1)//первая запятая после команды на несортированный товар 
+                {
+                    point = str.IndexOf(",", Str_ScheduleUnsorted.Length);
+                    if (str.IndexOf(",", Str_ScheduleUnsorted.Length + 2) != -1)//вторая запятая
+                    {
+                        index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", Str_ScheduleUnsorted.Length + 2) - point));//копируем подстроку длиной length
+                        point = str.IndexOf(",", Str_ScheduleUnsorted.Length + 2);//указатель на вторую запятую
+                        Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                        ScheduleUnsortedProcessing(index, Time);//вызываем метод несортированного товара
+                    }
+                }
+            }
+        }
+
         public static HardwareController GetInstance()
         {
             if (_hardwareController == null)
@@ -253,7 +332,29 @@ namespace AutomationSorting.ConveyorProcessing
             
             return _hardwareController;
         }
+
+        public void OnNewBarcodeEvent (string NewBarcode)
+        {
+            NewBarcodeEventArgs BarcodeEvent = new NewBarcodeEventArgs();
      
+            if (NewBarcodeEvent != null)
+            {
+                BarcodeEvent.Barcode = NewBarcode;
+                NewBarcodeEvent(this, BarcodeEvent);
+            }
+        }
+
+        public void OnSortingCompletedEvent(int NewIndex)
+        {
+            SortingCompletedEventArgs SortingCompleted = new SortingCompletedEventArgs();
+
+            if (SortingCompletedEvent != null)
+            {
+                SortingCompleted.Index = NewIndex;
+                SortingCompletedEvent(this, SortingCompleted);
+            }
+        }
+
         public void PreparePrinterLabel(string EPL, int index, long startProcessingTime)
         {
 
@@ -261,11 +362,8 @@ namespace AutomationSorting.ConveyorProcessing
         //задание на печать
         public void SchedulePrintingTask(int index, long startProcessingTime)
         {
-            //if (tmp_str == "00")
-            //{
                 string strToSend = Convert.ToString(index) + Convert.ToString(startProcessingTime);
                 serialPort.Write(strToSend);
-            //}
         }
         
         public void InitializeSortingIndexes(int index, string [] sortingIndexes)
@@ -275,29 +373,20 @@ namespace AutomationSorting.ConveyorProcessing
         //увод продукта на линию ручной обработки
         public void ScheduleSortingErrorProcessing(ProcessingErrorCodeEnum error, int index, long startProcessingTime)
         {
-            //if (tmp_str == "02")
-            //{
                 string strToSend = Convert.ToString(error) + Convert.ToString(index) + Convert.ToString(startProcessingTime);
                 serialPort.Write(strToSend);
-            //}
         }
         //скидывание
         public void ScheduleSorting(string sortingIndex, int index, long startProcessingTime)
         {
-            //if (tmp_str == "01")
-            //{
                 string strToSend = Convert.ToString(sortingIndex) + Convert.ToString(index) + Convert.ToString(startProcessingTime);
                 serialPort.Write(strToSend);
-            //}
         }
         //отправка товара в паллет для несортированных товаров
         public void ScheduleUnsortedProcessing(int index, long startProcessingTime)
         {
-            //if (tmp_str == "03")
-            //{
                 string strToSend = Convert.ToString(index) + Convert.ToString(startProcessingTime);
                 serialPort.Write(strToSend);
-            //}
         }
 
     }

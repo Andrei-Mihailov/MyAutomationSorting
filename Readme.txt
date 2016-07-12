@@ -1,9 +1,6 @@
-Изменения 11.07.2016. 
+Изменения 12.07.2016. 
 
-Создан алгоритм взаимодействия с СОМ - портом.
-
-Заполнены следущие методы:
-	SchedulePrintingTask
-	ScheduleSorting
-	ScheduleSortingErrorProcessing
-	ScheduleUnsortedProcessing
+Реализованы события:
+	NewBarcodeEvent 
+	SortingCompletedEvent.
+Так же разработан алгоритм обработки принятых откликов от контроллера (по событиям на скидывание).
