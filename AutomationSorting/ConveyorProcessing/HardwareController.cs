@@ -12,13 +12,13 @@ namespace AutomationSorting.ConveyorProcessing
         public event EventHandler<SortingCompletedEventArgs> SortingCompletedEvent;//при окончании обработки товара
 
         private static HardwareController _hardwareController = null;
-
+        
         bool result = false;
         public volatile static List<string> ErrorInf;
         public volatile static List<string> LogInf;
 
         SerialPort serialPort = null;
-        private HardwareController()
+        public HardwareController()
         {
             serialPort = new SerialPort();
             serialPort.PortName = "COM4";
@@ -253,9 +253,9 @@ namespace AutomationSorting.ConveyorProcessing
 
         public void ChoiseMethodSorting (string str)
         {
-            if (str == " ")
-                OnNewBarcodeEvent(str);
-            if (str == " ")
+            if (str == "NewBarcodeEvent")
+                //OnNewBarcodeEvent(str);
+            if (str == "SortingCompletedEvent")
                 OnSortingCompletedEvent(Convert.ToInt16(str));
             if (str.StartsWith(Str_PrintingTask) == true)//строка начинается с команды на печать 
             {
@@ -332,7 +332,7 @@ namespace AutomationSorting.ConveyorProcessing
             
             return _hardwareController;
         }
-
+        //включение события о получении нового бар-кода
         public void OnNewBarcodeEvent (string NewBarcode)
         {
             NewBarcodeEventArgs BarcodeEvent = new NewBarcodeEventArgs();
@@ -343,7 +343,7 @@ namespace AutomationSorting.ConveyorProcessing
                 NewBarcodeEvent(this, BarcodeEvent);
             }
         }
-
+        //включение события об окончании обработки товара
         public void OnSortingCompletedEvent(int NewIndex)
         {
             SortingCompletedEventArgs SortingCompleted = new SortingCompletedEventArgs();

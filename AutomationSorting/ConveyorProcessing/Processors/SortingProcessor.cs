@@ -9,6 +9,7 @@ namespace AutomationSorting.ConveyorProcessing
     public class SortingProcessor
     {
         private HardwareController _hardwareController = HardwareController.GetInstance();
+
         public void Process(ProcessingUnit unit)
         {
             if (unit.HasError)

@@ -17,7 +17,7 @@ namespace AutomationSorting.ConveyorProcessing
         private IUpcRepository _upcRepository;
         private ISlpRepository _slpRepository;
         private HardwareController _hardwareController;
-
+        
         private ProcessingUnit _unit = null;
 
         public ScanProcessor()
@@ -27,17 +27,11 @@ namespace AutomationSorting.ConveyorProcessing
 
             _hardwareController = HardwareController.GetInstance();
             _hardwareController.NewBarcodeEvent += NewBarcodeEventHandler;
-            _hardwareController.SortingCompletedEvent += SortingCompletedEventHandler;
         }
-
+        
         private void NewBarcodeEventHandler(object sender, NewBarcodeEventArgs e)
         {
             AddBarcode(e.Barcode);
-        }
-
-        private void SortingCompletedEventHandler(object sender, SortingCompletedEventArgs e)
-        {
-          //обработка прерывания при получении отклика об окончании обработки товара
         }
 
         public void Start(ProcessingUnit unit)
@@ -95,6 +89,21 @@ namespace AutomationSorting.ConveyorProcessing
             
         }
 
+    }
+
+    public class ProcessSorting
+    {
+        private HardwareController _hardwareController;
+        public ProcessSorting()
+        { 
+            _hardwareController = HardwareController.GetInstance();
+            _hardwareController.SortingCompletedEvent += SortingCompletedEventHandler;
+        }
+
+        private void SortingCompletedEventHandler(object sender, SortingCompletedEventArgs e)
+        {
+            //обработка прерывания при получении отклика об окончании обработки товара
+        }
     }
 
     public enum ScanProcessorStateEnum
