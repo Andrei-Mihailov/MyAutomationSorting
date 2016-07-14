@@ -1,6 +1,8 @@
 ﻿using AutomationSorting.ConveyorProcessing.Events;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.IO.Ports;
 
 namespace AutomationSorting.ConveyorProcessing
@@ -12,12 +14,13 @@ namespace AutomationSorting.ConveyorProcessing
         public event EventHandler<SortingCompletedEventArgs> SortingCompletedEvent;//при окончании обработки товара
 
         private static HardwareController _hardwareController = null;
-        
-        bool result = false;
+
+        public Queue<string> queue = new Queue<string>();
         public volatile static List<string> ErrorInf;
         public volatile static List<string> LogInf;
+        bool result = false;
 
-        SerialPort serialPort = null;
+        public SerialPort serialPort = null;
         public HardwareController()
         {
             serialPort = new SerialPort();
@@ -266,7 +269,7 @@ namespace AutomationSorting.ConveyorProcessing
                     {
                         index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", Str_PrintingTask.Length + 2) - point));//копируем подстроку длиной length
                         point = str.IndexOf(",", Str_PrintingTask.Length + 2);//указатель на вторую запятую
-                        Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                        Time = Convert.ToInt64(str.Substring(point++));//копируем подстроку до конца вызываемой строки
                         SchedulePrintingTask(index, Time);//вызываем метод печати
                     }
                 }
@@ -284,7 +287,7 @@ namespace AutomationSorting.ConveyorProcessing
                         {
                             index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", point + 2) - point));//копируем подстроку длиной length
                             point = str.IndexOf(",", point + 2);//указатель на третью запятую
-                            Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                            Time = Convert.ToInt64(str.Substring(point++));//копируем подстроку до конца вызываемой строки
                             ScheduleSortingErrorProcessing((ProcessingErrorCodeEnum)err, index, Time);//вызываем метод ручной обработки
                         }
                     }
@@ -303,7 +306,7 @@ namespace AutomationSorting.ConveyorProcessing
                         {
                             index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", point + 2) - point));//копируем подстроку длиной length
                             point = str.IndexOf(",", point + 2);//указатель на третью запятую
-                            Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                            Time = Convert.ToInt64(str.Substring(point++));//копируем подстроку до конца вызываемой строки
                             ScheduleSorting(Str_SortingIndex, index, Time);//вызываем метод скидывания
                         }
                     }
@@ -318,7 +321,7 @@ namespace AutomationSorting.ConveyorProcessing
                     {
                         index = Convert.ToInt16(str.Substring(point++, str.IndexOf(",", Str_ScheduleUnsorted.Length + 2) - point));//копируем подстроку длиной length
                         point = str.IndexOf(",", Str_ScheduleUnsorted.Length + 2);//указатель на вторую запятую
-                        Time = Convert.ToInt16(str.Substring(point++));//копируем подстроку до конца вызываемой строки
+                        Time = Convert.ToInt64(str.Substring(point++));//копируем подстроку до конца вызываемой строки
                         ScheduleUnsortedProcessing(index, Time);//вызываем метод несортированного товара
                     }
                 }
@@ -362,8 +365,9 @@ namespace AutomationSorting.ConveyorProcessing
         //задание на печать
         public void SchedulePrintingTask(int index, long startProcessingTime)
         {
-                string strToSend = Convert.ToString(index) + Convert.ToString(startProcessingTime);
-                serialPort.Write(strToSend);
+            string strToSend = index.ToString() + "," +  startProcessingTime.ToString();
+            //передача команды в очередь команд
+            queue.Enqueue(strToSend);
         }
         
         public void InitializeSortingIndexes(int index, string [] sortingIndexes)
@@ -373,20 +377,23 @@ namespace AutomationSorting.ConveyorProcessing
         //увод продукта на линию ручной обработки
         public void ScheduleSortingErrorProcessing(ProcessingErrorCodeEnum error, int index, long startProcessingTime)
         {
-                string strToSend = Convert.ToString(error) + Convert.ToString(index) + Convert.ToString(startProcessingTime);
-                serialPort.Write(strToSend);
+            string strToSend = error.ToString() + "," + index.ToString() + "," + startProcessingTime.ToString();
+            //передача команды в очередь команд
+            queue.Enqueue(strToSend);
         }
         //скидывание
         public void ScheduleSorting(string sortingIndex, int index, long startProcessingTime)
         {
-                string strToSend = Convert.ToString(sortingIndex) + Convert.ToString(index) + Convert.ToString(startProcessingTime);
-                serialPort.Write(strToSend);
+            string strToSend = sortingIndex.ToString() + "," + index.ToString() + "," + startProcessingTime.ToString();
+            //передача команды в очередь команд
+            queue.Enqueue(strToSend);
         }
         //отправка товара в паллет для несортированных товаров
         public void ScheduleUnsortedProcessing(int index, long startProcessingTime)
         {
-                string strToSend = Convert.ToString(index) + Convert.ToString(startProcessingTime);
-                serialPort.Write(strToSend);
+            string strToSend = index.ToString() + "," + startProcessingTime.ToString();
+            //передача команды в очередь команд
+            queue.Enqueue(strToSend);
         }
 
     }
